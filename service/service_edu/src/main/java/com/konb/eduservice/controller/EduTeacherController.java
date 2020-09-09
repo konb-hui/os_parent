@@ -1,6 +1,7 @@
 package com.konb.eduservice.controller;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.konb.commonutils.R;
 import com.konb.eduservice.entity.EduTeacher;
 import com.konb.eduservice.service.EduTeacherService;
@@ -51,6 +52,21 @@ public class EduTeacherController {
         }
     }
 
+    /**
+     *  分页查询当前讲师
+     *  current但前页
+     *  limit每页数量
+     */
+    @GetMapping("pageTeacher/{current}/{limit}")
+    public R pageTeacher(@PathVariable long current, @PathVariable long limit) {
+        Page<EduTeacher> pageTeacher = new Page<>(current, limit);
+
+        teacherService.page(pageTeacher, null);
+        long total = pageTeacher.getTotal();
+        List<EduTeacher> rows = pageTeacher.getRecords();
+
+        return R.ok().data("total", total).data("rows", rows);
+    }
 
 }
 
