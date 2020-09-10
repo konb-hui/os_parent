@@ -113,5 +113,17 @@ public class EduTeacherController {
         return R.ok().data("total", total).data("record", records);
     }
 
+    /**
+     * 添加讲师
+     */
+    @PostMapping("addTeacher")
+    public R addTeacher(@RequestBody(required = false) EduTeacher eduTeacher) {
+        boolean save = teacherService.save(eduTeacher);
+        if (save) {
+            return R.ok();
+        } else {
+            return R.error();
+        }
+    }
 }
 
