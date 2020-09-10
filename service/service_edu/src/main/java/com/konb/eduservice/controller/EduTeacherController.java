@@ -1,14 +1,17 @@
 package com.konb.eduservice.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.konb.commonutils.R;
 import com.konb.eduservice.entity.EduTeacher;
+import com.konb.eduservice.entity.vo.TeacherQuery;
 import com.konb.eduservice.service.EduTeacherService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -63,9 +66,51 @@ public class EduTeacherController {
 
         teacherService.page(pageTeacher, null);
         long total = pageTeacher.getTotal();
-        List<EduTeacher> rows = pageTeacher.getRecords();
+        List<EduTeacher> records = pageTeacher.getRecords();
 
-        return R.ok().data("total", total).data("rows", rows);
+        return R.ok().data("total", total).data("records", records);
+    }
+
+    /**
+     * 分页查询
+     * 条件查询：名字、头衔、开始时间、结束时间
+     */
+    @PostMapping("pageTeacherCondition/{current}/{limit}")
+    public R pageTeacherCondition(@PathVariable long current, @PathVariable long limit,
+                                  @RequestBody(required = false) TeacherQuery teacherQuery) {
+
+        //创建Page对象
+        Page<EduTeacher> pageTeacher = new Page<>(current, limit);
+
+        //构建条件
+        QueryWrapper<EduTeacher> wrapper = new QueryWrapper<>();
+
+        //多条件组合查询，动态SQL
+        String name = teacherQuery.getName();
+        Integer level = teacherQuery.getLevel();
+        String begin = teacherQuery.getBegin();
+        String end = teacherQuery.getEnd();
+
+        //判断条件是否为空，若不为空则拼接条件
+        if (!StringUtils.isEmpty(name)) {
+            wrapper.like("name", name);
+        }
+        if (!StringUtils.isEmpty(level)) {
+            wrapper.eq("level", level);
+        }
+        if (!StringUtils.isEmpty(begin)) {
+            wrapper.ge("gmt_create", begin);
+        }
+        if(!StringUtils.isEmpty(end)) {
+            wrapper.lt("gmt_create", end);
+        }
+
+        //调用方法实现条件查询分页
+        teacherService.page(pageTeacher, wrapper);
+
+        long total = pageTeacher.getTotal();
+        List<EduTeacher> records = pageTeacher.getRecords();
+        return R.ok().data("total", total).data("record", records);
     }
 
 }
