@@ -7,6 +7,8 @@ import com.konb.commonutils.R;
 import com.konb.eduservice.entity.EduTeacher;
 import com.konb.eduservice.entity.vo.TeacherQuery;
 import com.konb.eduservice.service.EduTeacherService;
+import com.konb.servicebase.ExceptionHandler.OsException;
+import com.mysql.cj.x.protobuf.Mysqlx;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.PastOrPresent;
 import java.util.List;
 
 /**
@@ -120,6 +123,28 @@ public class EduTeacherController {
     public R addTeacher(@RequestBody(required = false) EduTeacher eduTeacher) {
         boolean save = teacherService.save(eduTeacher);
         if (save) {
+            return R.ok();
+        } else {
+            return R.error();
+        }
+    }
+
+    /**
+     * 通过id查询讲师
+     */
+    @GetMapping("getTeacher/{id}")
+    public R getTeacher(@PathVariable String id) {
+        EduTeacher eduTeacher = teacherService.getById(id);
+        return R.ok().data("teacher", eduTeacher);
+    }
+
+    /**
+     * 修改讲师
+     */
+    @PostMapping("updateTeacher")
+    public R updateTeacher(@RequestBody EduTeacher eduTeacher) {
+        boolean flag = teacherService.updateById(eduTeacher);
+        if (flag) {
             return R.ok();
         } else {
             return R.error();
